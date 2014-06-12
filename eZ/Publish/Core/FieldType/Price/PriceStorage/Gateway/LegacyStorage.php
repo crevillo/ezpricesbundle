@@ -159,9 +159,8 @@ class LegacyStorage extends Gateway
             {
                 $contentObjectAttribute = eZContentObjectAttribute::fetch( $field->id, $field->versionNo );
                 $price = $contentObjectAttribute->content();
-                
-                $priceData = array();
 
+                $priceData = array();
                 foreach ( $price->attributes() as $attribute )
                 {
                     $priceData[$attribute] = $price->attribute( $attribute );
