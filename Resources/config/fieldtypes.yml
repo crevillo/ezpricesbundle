@@ -1,0 +1,9 @@
+parameters:
+    ezpublish.fieldType.ezprice.class: Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\Type
+
+services:
+    ezpublish.fieldType.ezprice.class:
+        parent: ezpublish.fieldType
+        class: %ezpublish.fieldType.ezprice.class%
+        tags:
+            - {name: ezpublish.fieldType, alias: ezprice}

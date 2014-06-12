@@ -1,0 +1,235 @@
+<?php
+
+namespace Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price;
+
+use eZ\Publish\Core\FieldType\FieldType;
+use eZ\Publish\SPI\Persistence\Content\FieldValue;
+use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
+use eZ\Publish\SPI\FieldType\Value as SPIValue;
+use eZ\Publish\Core\FieldType\Value as BaseValue;
+
+class Type extends FieldType
+{
+    protected $validatorConfigurationSchema = array(
+        'FloatValueValidator' => array(
+            'minFloatValue' => array(
+                'type' => 'float',
+                'default' => false
+            ),
+            'maxFloatValue' => array(
+                'type' => 'float',
+                'default' => false
+            )
+        )
+    );
+
+    /**
+     * Validates the validatorConfiguration of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct
+     *
+     * @param mixed $validatorConfiguration
+     *
+     * @return \eZ\Publish\SPI\FieldType\ValidationError[]
+     */
+    public function validateValidatorConfiguration( $validatorConfiguration )
+    {
+        $validationErrors = array();
+
+        foreach ( $validatorConfiguration as $validatorIdentifier => $constraints )
+        {
+            if ( $validatorIdentifier !== 'FloatValueValidator' )
+            {
+                $validationErrors[] = new ValidationError(
+                    "Validator '%validator%' is unknown",
+                    null,
+                    array(
+                        "validator" => $validatorIdentifier
+                    )
+                );
+
+                continue;
+            }
+
+            foreach ( $constraints as $name => $value )
+            {
+                switch ( $name )
+                {
+                    case "minFloatValue":
+                    case "maxFloatValue":
+                        if ( $value !== false && !is_numeric( $value ) )
+                        {
+                            $validationErrors[] = new ValidationError(
+                                "Validator parameter '%parameter%' value must be of numeric type",
+                                null,
+                                array(
+                                    "parameter" => $name
+                                )
+                            );
+                        }
+                        break;
+                    default:
+                        $validationErrors[] = new ValidationError(
+                            "Validator parameter '%parameter%' is unknown",
+                            null,
+                            array(
+                                "parameter" => $name
+                            )
+                        );
+                }
+            }
+        }
+
+        return $validationErrors;
+    }
+
+    /**
+     * Returns the field type identifier for this field type
+     *
+     * @return string
+     */
+    public function getFieldTypeIdentifier()
+    {
+        return 'ezprice';
+    }
+
+    /**
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\Float\Value $value
+     *
+     * @return string
+     */
+    public function getName( SPIValue $value )
+    {
+        return (string)$value->value;
+    }
+
+    /**
+     * Returns the fallback default value of field type when no such default
+     * value is provided in the field definition in content types.
+     *
+     * @return \eZ\Publish\Core\FieldType\Float\Value
+     */
+    public function getEmptyValue()
+    {
+        return new Value;
+    }
+
+    /**
+     * Implements the core of {@see isEmptyValue()}.
+     *
+     * @param mixed $value
+     *
+     * @return boolean
+     */
+    public function isEmptyValue( SPIValue $value )
+    {
+        return $value->value === null;
+    }
+
+    /**
+     * Inspects given $inputValue and potentially converts it into a dedicated value object.
+     *
+     * @param int|float|\eZ\Publish\Core\FieldType\Float\Value $inputValue
+     *
+     * @return \eZ\Publish\Core\FieldType\Float\Value The potentially converted and structurally plausible value.
+     */
+    protected function createValueFromInput( $inputValue )
+    {
+        print_r( $inputValue );
+        if ( is_int( $inputValue ) )
+        {
+            $inputValue = (float)$inputValue;
+        }
+
+        if ( is_float( $inputValue ) )
+        {
+            $inputValue = new Value( $inputValue );
+        }
+
+        return $inputValue;
+    }
+
+    /**
+     * Throws an exception if value structure is not of expected format.
+     *
+     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException If the value does not match the expected structure.
+     *
+     * @param \eZ\Publish\Core\FieldType\Float\Value $value
+     *
+     * @return void
+     */
+    protected function checkValueStructure( BaseValue $value )
+    {
+        if ( !is_float( $value->value ) )
+        {
+            throw new InvalidArgumentType(
+                '$value->value',
+                'float',
+                $value->value
+            );
+        }
+    }
+
+    /**
+     * Returns information for FieldValue->$sortKey relevant to the field type.
+     *
+     * @param \eZ\Publish\Core\FieldType\Float\Value $value
+     *
+     * @return array
+     */
+    protected function getSortInfo( BaseValue $value )
+    {
+        return false;
+    }
+
+    /**
+     * Converts an $hash to the Value defined by the field type
+     *
+     * @param mixed $hash
+     *
+     * @return \eZ\Publish\Core\FieldType\Float\Value $value
+     */
+    public function fromHash( $hash )
+    {
+        if ( $hash === null )
+        {
+            return $this->getEmptyValue();
+        }
+        return new Value( $hash );
+    }
+
+    /**
+     * Converts a $Value to a hash
+     *
+     * @param \eZ\Publish\Core\FieldType\Float\Value $value
+     *
+     * @return mixed
+     */
+    public function toHash( SPIValue $value )
+    {
+        if ( $this->isEmptyValue( $value ) )
+        {
+            return null;
+        }
+        return $value->value;
+    }
+
+    /**
+     * Returns whether the field type is searchable
+     *
+     * @return boolean
+     */
+    public function isSearchable()
+    {
+        return true;
+    }
+
+    public function fromPersistenceValue( FieldValue $fieldValue )
+    {
+        if( !is_null( $fieldValue->externalData ) )
+            return new Value( $fieldValue->externalData );
+    }
+}

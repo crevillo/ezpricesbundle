@@ -1,0 +1,7 @@
+parameters:
+#    crevillo_ez_prices.example.class: Crevillo\EzPricesBundle\Example
+
+services:
+#    crevillo_ez_prices.example:
+#        class: %crevillo_ez_prices.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]
