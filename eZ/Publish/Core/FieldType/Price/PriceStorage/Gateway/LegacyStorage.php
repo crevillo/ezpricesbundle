@@ -158,18 +158,8 @@ class LegacyStorage extends Gateway
             function () use ( $field )
             {
                 $contentObjectAttribute = eZContentObjectAttribute::fetch( $field->id, $field->versionNo );
-                $classAttribute = $contentObjectAttribute->contentClassAttribute();
-                $storedPrice = $contentObjectAttribute->attribute( "data_float" );
-                $price = new eZPrice( $classAttribute, $contentObjectAttribute, $storedPrice );
-
-                if ( $contentObjectAttribute->attribute( 'data_text' ) != '' )
-                {
-                    list( $vatType, $vatExInc ) = explode( ',', $contentObjectAttribute->attribute( "data_text" ), 2 );
-
-                    $price->setAttribute( 'selected_vat_type', $vatType );
-                    $price->setAttribute( 'is_vat_included', $vatExInc );
-                }
-
+                $price = $contentObjectAttribute->content();
+                
                 $priceData = array();
 
                 foreach ( $price->attributes() as $attribute )
