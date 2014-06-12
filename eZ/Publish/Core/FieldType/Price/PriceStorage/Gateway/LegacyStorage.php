@@ -6,7 +6,6 @@ use Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage\Gateway
 use eZ\Publish\SPI\Persistence\Content\Field;
 use eZ\Publish\Core\Persistence\Database\DatabaseHandler;
 use \eZContentObjectAttribute;
-use \eZPrice;
 use Closure;
 
 class LegacyStorage extends Gateway
