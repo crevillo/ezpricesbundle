@@ -9,37 +9,22 @@
 
 namespace Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage;
 
+use Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\LegacyKernelGateway;
 use eZ\Publish\SPI\Persistence\Content\Field;
-use eZ\Publish\Core\FieldType\StorageGateway;
 
-abstract class Gateway extends StorageGateway
+abstract class Gateway extends LegacyKernelGateway
 {
     /**
      * @see \eZ\Publish\SPI\FieldType\FieldStorage::storeFieldData()
      */
-    abstract public function storeFieldData( Field $field, $contentTypeId );
+    abstract public function storePrice( Field $field, $contentTypeId );
 
-    /**
-     * Sets the list of assigned keywords into $field->value->externalData
-     *
-     * @param Field $field
-     *
-     * @return void
-     */
-    abstract public function getFieldData( Field $field );
 
-    /**
-     * Retrieve the ContentType ID for the given $field
-     *
-     * @param \eZ\Publish\SPI\Persistence\Content\Field $field
-     *
-     * @return mixed
-     */
-    abstract public function getContentTypeId( Field $field );
+    abstract public function getPrice( Field $field );
 
     /**
      * @see \eZ\Publish\SPI\FieldType\FieldStorage::deleteFieldData()
      */
-    abstract public function deleteFieldData( $fieldId );
+    abstract public function deletePrice( $fieldId );
 }
 

@@ -1,9 +1,18 @@
 parameters:
-    ezpublish.fieldType.ezprice.storage_gateway.class: Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage\Gateway\LegacyStorage
+    crevillo.ezpricesbundle.fieldType.ezprice.storage_gateway.class: Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage\Gateway\LegacyKernel
+    crevillo.ezpricesbundle.persistence.legacy.legacy_kernel_handler.class: Crevillo\EzPricesBundle\eZ\Publish\Core\Persistence\Legacy\Content\LegacyKernelHandler
+
 
 services:
-    ezpublish.fieldType.ezprice.storage_gateway:
-        class: %ezpublish.fieldType.ezprice.storage_gateway.class%
+    crevillo.ezpricesbundle.persistence.legacy.legacy_kernel_handler:
+        class: %crevillo.ezpricesbundle.persistence.legacy.legacy_kernel_handler.class%
+        arguments:
+           - @ezpublish.persistence.external_storage_registry
+           -
+               identifier: "LegacyKernel"
+               connection: @ezpublish_legacy.kernel
+
+    crevillo.ezpricesbundle.fieldType.ezprice.storage_gateway:
+        class: %crevillo.ezpricesbundle.fieldType.ezprice.storage_gateway.class%
         tags:
-            - {name: ezpublish.fieldType.externalStorageHandler.gateway, alias: ezprice, identifier: LegacyStorage}
-        arguments: [@ezpublish_legacy.kernel]
+            - {name: ezpublish.fieldType.externalStorageHandler.gateway, alias: ezprice, identifier: LegacyKernel}

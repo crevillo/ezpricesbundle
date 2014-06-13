@@ -1,8 +1,8 @@
 parameters:
-    ezpublish.fieldType.ezprice.externalStorage.class: Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage
+    crevillo.ezpricesbundle.fieldType.ezprice.externalStorage.class: Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage
 
 services:
-    ezpublish.fieldType.ezprice.externalStorage:
-        class: %ezpublish.fieldType.ezprice.externalStorage.class%
+    crevillo.ezpricesbundle.fieldType.ezprice.externalStorage:
+        class: %crevillo.ezpricesbundle.fieldType.ezprice.externalStorage.class%
         tags:
             - {name: ezpublish.fieldType.externalStorageHandler, alias: ezprice}

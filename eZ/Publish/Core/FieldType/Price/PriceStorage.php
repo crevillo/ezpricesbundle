@@ -9,7 +9,7 @@
 
 namespace Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price;
 
-use eZ\Publish\Core\FieldType\GatewayBasedStorage;
+use Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\LegacyKernelBasedStorage;
 use eZ\Publish\SPI\Persistence\Content\VersionInfo;
 use eZ\Publish\SPI\Persistence\Content\Field;
 
@@ -20,7 +20,7 @@ use eZ\Publish\SPI\Persistence\Content\Field;
  * $field->value->externalData. $field->value->data is simply empty, because no
  * internal data is store.
  */
-class PriceStorage extends GatewayBasedStorage
+class PriceStorage extends LegacyKernelBasedStorage
 {
     /**
      * @see \eZ\Publish\SPI\FieldType\FieldStorage
@@ -52,8 +52,7 @@ class PriceStorage extends GatewayBasedStorage
     public function getFieldData( VersionInfo $versionInfo, Field $field, array $context )
     {
         $gateway = $this->getGateway( $context );
-        // @todo: This should already retrieve the ContentType ID
-        return $gateway->getFieldData( $field );
+        return $gateway->getPrice( $field );
     }
 
     /**
