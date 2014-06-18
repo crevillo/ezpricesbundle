@@ -15,7 +15,7 @@ class LegacyKernel extends Gateway
      */
     private $kernelClosure;
 
-    public function setLegacyKernel( $legacyKernelClosure )
+    public function setConnection( $legacyKernelClosure )
     {
         $this->kernelClosure = $legacyKernelClosure;
     }
