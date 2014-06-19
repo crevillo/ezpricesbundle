@@ -9,21 +9,25 @@ use Closure;
 
 class LegacyKernel extends Gateway
 {
-
     /**
      * @var \Closure
      */
-    private $kernelClosure;
+    private $legacyKernelClosure;
+
+    public function __construct( \Closure $legacyKernelClosure )
+    {
+        $this->legacyKernelClosure = $legacyKernelClosure;
+    }
 
     public function setConnection( $legacyKernelClosure )
     {
-        $this->kernelClosure = $legacyKernelClosure;
+        $kernelClosure = $this->legacyKernelClosure;
+        $this->connection = $kernelClosure();
     }
 
     protected function getLegacyKernel()
     {
-        $kernelClosure = $this->kernelClosure;
-        return $kernelClosure();
+        return $this->connection;
     }
 
     /**
