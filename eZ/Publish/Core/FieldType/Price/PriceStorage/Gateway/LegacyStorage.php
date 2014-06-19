@@ -4,80 +4,60 @@ namespace Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage\G
 
 use Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage\Gateway;
 use eZ\Publish\SPI\Persistence\Content\Field;
-use \eZContentObjectAttribute;
-use Closure;
 
-class LegacyKernel extends Gateway
+class LegacyStorage extends Gateway
 {
     /**
-     * @var \Closure
-     */
-    private $legacyKernelClosure;
-
-    public function __construct( \Closure $legacyKernelClosure )
-    {
-        $this->legacyKernelClosure = $legacyKernelClosure;
-    }
-
-    public function setConnection( $legacyKernelClosure )
-    {
-        $kernelClosure = $this->legacyKernelClosure;
-        $this->connection = $kernelClosure();
-    }
-
-    protected function getLegacyKernel()
-    {
-        return $this->connection;
-    }
-
-    /**
-     * Stores the price from $field->value->externalData
+     * Connection
      *
-     * @param \eZ\Publish\SPI\Persistence\Content\Field
-     * @param mixed $contentTypeId
+     * @var mixed
      */
-    public function storePrice( Field $field, $contentTypeId )
-    {
+    protected $dbHandler;
 
+    /**
+     * Set database handler for this gateway
+     *
+     * @param mixed $dbHandler
+     *
+     * @return void
+     * @throws \RuntimeException if $dbHandler is not an instance of
+     *         {@link \eZ\Publish\Core\Persistence\Database\DatabaseHandler}
+     */
+    public function setConnection( $dbHandler )
+    {
+        // This obviously violates the Liskov substitution Principle, but with
+        // the given class design there is no sane other option. Actually the
+        // dbHandler *should* be passed to the constructor, and there should
+        // not be the need to post-inject it.
+        if ( ! ( $dbHandler instanceof DatabaseHandler ) )
+        {
+            throw new \RuntimeException( "Invalid dbHandler passed" );
+        }
+
+        $this->dbHandler = $dbHandler;
     }
 
     /**
-     * Sets the list of assigned keywords into $field->value->externalData
+     * Sets the price data into $field->value->externalData
      *
      * @param Field $field
      *
      * @return void
      */
-    public function getPrice( Field $field )
+    public function getFieldData( Field $field )
     {
-        $field->value->externalData = $this->getSimplePrice( $field );
+    }
+
+    public function deleteFieldData( $versionNo, $fieldId )
+    {
     }
 
     /**
-     * Stores the keyword list from $field->value->externalData
-     *
-     * @param mixed $fieldId
+     * @see \eZ\Publish\Core\FieldType\Url\UrlStorage\Gateway
      */
-    public function deletePrice( $fieldId )
+    public function storeFieldData( VersionInfo $versionInfo, Field $field )
     {
-    }
-
-    private function getSimplePrice( Field $field )
-    {
-        return $this->getLegacyKernel()->runCallback(
-            function () use ( $field )
-            {
-                $contentObjectAttribute = eZContentObjectAttribute::fetch( $field->id, $field->versionNo );
-                $price = $contentObjectAttribute->content();
-
-                $priceData = array();
-                foreach ( $price->attributes() as $attribute )
-                {
-                    $priceData[$attribute] = $price->attribute( $attribute );
-                }
-
-                return $priceData;
-            }
-        );
+        // Signals that the Value has been modified and that an update is to be performed
+        return true;
     }
 }

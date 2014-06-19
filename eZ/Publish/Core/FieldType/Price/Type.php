@@ -4,25 +4,11 @@ namespace Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price;
 
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\SPI\Persistence\Content\FieldValue;
-use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
 use eZ\Publish\Core\FieldType\Value as BaseValue;
 
 class Type extends FieldType
 {
-    protected $validatorConfigurationSchema = array(
-        'FloatValueValidator' => array(
-            'minFloatValue' => array(
-                'type' => 'float',
-                'default' => false
-            ),
-            'maxFloatValue' => array(
-                'type' => 'float',
-                'default' => false
-            )
-        )
-    );
-
     /**
      * Validates the validatorConfiguration of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct
      *
@@ -32,53 +18,6 @@ class Type extends FieldType
      */
     public function validateValidatorConfiguration( $validatorConfiguration )
     {
-        $validationErrors = array();
-
-        foreach ( $validatorConfiguration as $validatorIdentifier => $constraints )
-        {
-            if ( $validatorIdentifier !== 'FloatValueValidator' )
-            {
-                $validationErrors[] = new ValidationError(
-                    "Validator '%validator%' is unknown",
-                    null,
-                    array(
-                        "validator" => $validatorIdentifier
-                    )
-                );
-
-                continue;
-            }
-
-            foreach ( $constraints as $name => $value )
-            {
-                switch ( $name )
-                {
-                    case "minFloatValue":
-                    case "maxFloatValue":
-                        if ( $value !== false && !is_numeric( $value ) )
-                        {
-                            $validationErrors[] = new ValidationError(
-                                "Validator parameter '%parameter%' value must be of numeric type",
-                                null,
-                                array(
-                                    "parameter" => $name
-                                )
-                            );
-                        }
-                        break;
-                    default:
-                        $validationErrors[] = new ValidationError(
-                            "Validator parameter '%parameter%' is unknown",
-                            null,
-                            array(
-                                "parameter" => $name
-                            )
-                        );
-                }
-            }
-        }
-
-        return $validationErrors;
     }
 
     /**
@@ -97,13 +36,13 @@ class Type extends FieldType
      * It will be used to generate content name and url alias if current field is designated
      * to be used in the content name/urlAlias pattern.
      *
-     * @param \eZ\Publish\Core\FieldType\Float\Value $value
+     * @param \eZ\Publish\SPI\FieldType\Value $value
      *
      * @return string
      */
     public function getName( SPIValue $value )
     {
-        return (string)$value->value;
+        return (string)$value->price;
     }
 
     /**
@@ -126,7 +65,7 @@ class Type extends FieldType
      */
     public function isEmptyValue( SPIValue $value )
     {
-        return $value->value === null;
+        return $value->price === null;
     }
 
     /**
@@ -135,21 +74,11 @@ class Type extends FieldType
      * @param int|float|\eZ\Publish\Core\FieldType\Float\Value $inputValue
      *
      * @return \eZ\Publish\Core\FieldType\Float\Value The potentially converted and structurally plausible value.
+     * @todo define all the ways a price could be entered
+     *
      */
     protected function createValueFromInput( $inputValue )
     {
-        print_r( $inputValue );
-        if ( is_int( $inputValue ) )
-        {
-            $inputValue = (float)$inputValue;
-        }
-
-        if ( is_float( $inputValue ) )
-        {
-            $inputValue = new Value( $inputValue );
-        }
-
-        return $inputValue;
     }
 
     /**
@@ -163,14 +92,6 @@ class Type extends FieldType
      */
     protected function checkValueStructure( BaseValue $value )
     {
-        if ( !is_float( $value->value ) )
-        {
-            throw new InvalidArgumentType(
-                '$value->value',
-                'float',
-                $value->value
-            );
-        }
     }
 
     /**
@@ -182,7 +103,8 @@ class Type extends FieldType
      */
     protected function getSortInfo( BaseValue $value )
     {
-        return false;
+        $intPrice = (int)($value->price * 100.00);
+        return $intPrice;
     }
 
     /**
@@ -194,11 +116,6 @@ class Type extends FieldType
      */
     public function fromHash( $hash )
     {
-        if ( $hash === null )
-        {
-            return $this->getEmptyValue();
-        }
-        return new Value( $hash );
     }
 
     /**
@@ -210,11 +127,6 @@ class Type extends FieldType
      */
     public function toHash( SPIValue $value )
     {
-        if ( $this->isEmptyValue( $value ) )
-        {
-            return null;
-        }
-        return $value->value;
     }
 
     /**
@@ -227,6 +139,15 @@ class Type extends FieldType
         return true;
     }
 
+    /**
+     * Converts a persistence $fieldValue to a Value
+     *
+     * This method builds a field type value from the $data and $externalData properties.
+     *
+     * @param \eZ\Publish\SPI\Persistence\Content\FieldValue $fieldValue
+     *
+     * @return \eZ\Publish\Core\FieldType\BinaryBase\Value
+     */
     public function fromPersistenceValue( FieldValue $fieldValue )
     {
         if( !is_null( $fieldValue->externalData ) )

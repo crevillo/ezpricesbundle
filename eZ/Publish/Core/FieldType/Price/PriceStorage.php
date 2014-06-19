@@ -16,9 +16,6 @@ use eZ\Publish\SPI\Persistence\Content\Field;
 /**
  * Converter for Price field type external storage
  *
- * The keyword storage ships a list (array) of keywords in
- * $field->value->externalData. $field->value->data is simply empty, because no
- * internal data is store.
  */
 class PriceStorage extends LegacyKernelStorage
 {
@@ -51,7 +48,6 @@ class PriceStorage extends LegacyKernelStorage
      */
     public function getFieldData( VersionInfo $versionInfo, Field $field, array $context )
     {
-        print_r( $context['identifier'] );
         $gateway = $this->getGateway( $context );
         return $gateway->getPrice( $field );
     }
@@ -73,21 +69,13 @@ class PriceStorage extends LegacyKernelStorage
     }
 
     /**
-     * Checks if field type has external data to deal with
-     *
-     * @return boolean
-     */
-    public function hasFieldData()
-    {
-        return true;
-    }
-
-    /**
      * @param \eZ\Publish\SPI\Persistence\Content\Field $field
      * @param array $context
+     *
      */
     public function getIndexData( VersionInfo $versionInfo, Field $field, array $context )
     {
+        // @todo: return price data for indexing
         return null;
     }
 }

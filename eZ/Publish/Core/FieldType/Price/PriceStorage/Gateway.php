@@ -9,16 +9,39 @@
 
 namespace Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\Price\PriceStorage;
 
-use Crevillo\EzPricesBundle\eZ\Publish\Core\FieldType\LegacyKernelGateway;
 use eZ\Publish\Core\FieldType\StorageGateway;
 use eZ\Publish\SPI\Persistence\Content\Field;
+use eZ\Publish\SPI\Persistence\Content\VersionInfo;
 
 abstract class Gateway extends StorageGateway
 {
-    abstract public function storePrice( Field $field, $contentTypeId );
+    /**
+     * Stores a URL based on the given field data
+     *
+     * @param VersionInfo $versionInfo
+     * @param Field $field
+     *
+     * @return boolean
+     */
+    abstract public function storeFieldData( VersionInfo $versionInfo, Field $field );
 
-    abstract public function getPrice( Field $field );
+    /**
+     * Sets a loaded URL, if one is stored for the given field
+     *
+     * @param Field $field
+     *
+     * @return void
+     */
+    abstract public function getFieldData( Field $field );
 
-    abstract public function deletePrice( $fieldId );
+    /**
+     * Deletes external data for $fieldId in $versionNo
+     *
+     * @param mixed $fieldId
+     * @param mixed $versionNo
+     *
+     * @return void
+     */
+    abstract public function deleteFieldData( $versionNo, $fieldId );
 }
 
